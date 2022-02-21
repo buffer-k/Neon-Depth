@@ -75,14 +75,24 @@ class Bullet(pygame.sprite.Sprite):
         if player.xvel < 0:
             self.rect.x = player.rect.x - 10
             self.xvel = -3
+            self.image = pygame.transform.flip(self.image, True, False)
         self.rect.y = player.rect.y + 40
         self.player = player
 
-    def update(self):
-        print(self.rect.x, self.player.xvel)
+    def update(self, enemies):
+        # print(self.rect.x, self.player.xvel)
         self.rect.x += self.xvel
         if self.rect.x > 1200 or self.rect.x < -30:
             self.kill()
+
+        if pygame.sprite.spritecollideany(self, enemy_group):
+            # print(self.rect.x)
+            self.kill()
+            # for enemy in enemies:
+            #     print(enemy.rect.x)
+            #     if pygame.sprite.spritecollideany(enemy, bullets):
+            #         print(enemy.rect.x)
+            #         enemy.kill()
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -96,7 +106,8 @@ class Enemy(pygame.sprite.Sprite):
 
     # def update(self):
     #     if pygame.sprite.spritecollideany(self, bullets):
-    #         self.kill() TODO: Убийство врага пулей.
+    #         print(self.rect.x)
+    #         self.kill()
 
 
 class Player(pygame.sprite.Sprite):
@@ -220,7 +231,7 @@ def generate_level(level):
 def main():
     global i
     global moving
-    enemy = Enemy(400, 490)
+    enemies = [Enemy(400, 490), Enemy(600, 490)]
     bg = pygame.image.load("data/Background.png")
     player = Player(load_image('stay.png'), 4, 1, 200, 400)
     generate_level(load_level('lvl1.txt'))
@@ -263,7 +274,7 @@ def main():
         screen.blit(bg, (0, 0))
         all_sprites.draw(screen)
         player_group.update(left, right, up)
-        bullets.update()
+        bullets.update(enemies)  # TODO: Убийство пулей
         pygame.display.flip()
         clock.tick(60)
     pygame.quit()
