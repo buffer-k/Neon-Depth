@@ -1,0 +1,156 @@
+Index: main.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import pygame\r\nimport sys\r\nimport os\r\nimport pytmx\r\n\r\npygame.init()\r\nsize = width, height = 550, 550\r\nscreen = pygame.display.set_mode(size)\r\nclock = pygame.time.Clock()\r\n\r\n\r\nall_sprites = pygame.sprite.Group()\r\ntiles_group = pygame.sprite.Group()\r\nplayer_group = pygame.sprite.Group()\r\n\r\n\r\ndef terminate():\r\n    pygame.quit()\r\n    sys.exit()\r\n\r\n\r\ndef load_image(name, colorkey=None):\r\n    fullname = os.path.join('data', name)\r\n    # если файл не существует, то выходим\r\n    if not os.path.isfile(fullname):\r\n        print(f\"Файл с изображением '{fullname}' не найден\")\r\n        sys.exit()\r\n    image = pygame.image.load(fullname)\r\n    if colorkey is not None:\r\n        image = image.convert()\r\n        if colorkey == -1:\r\n            colorkey = image.get_at((0, 0))\r\n        image.set_colorkey(colorkey)\r\n    else:\r\n        image = image.convert_alpha()\r\n    return image\r\n\r\n\r\ntile_images = {\r\n    'wall': load_image('box.png'),  # Стена\r\n    'empty': load_image('floor.png')  # Пол\r\n}\r\nplayer_image = load_image('mario.png')\r\n\r\ntile_width = tile_height = 50\r\n\r\n\r\n\r\nclass Tile(pygame.sprite.Sprite):\r\n    def __init__(self, tile_type, pos_x, pos_y):\r\n        super().__init__(tiles_group, all_sprites)\r\n        self.image = tile_images[tile_type]\r\n        # if (self.image.get_rect().w, self.image.get_rect().h) < (tile_width, tile_height):\r\n        #     self.image = pygame.transform.scale(self.image, (tile_width, tile_height))\r\n        self.rect = self.image.get_rect().move(\r\n            tile_width * pos_x, tile_height * pos_y)\r\n\r\n\r\nclass Player(pygame.sprite.Sprite):\r\n    def __init__(self, pos_x, pos_y):\r\n        super().__init__(player_group, all_sprites)\r\n        self.image = player_image\r\n        self.image = pygame.transform.scale(self.image, (32, 32))\r\n        self.rect = self.image.get_rect().move(\r\n            tile_width * pos_x + 15, tile_height * pos_y + 5)\r\n\r\n\r\nclass Camera:\r\n    def __init__(self):\r\n        self.dx = 0\r\n        self.dy = 0\r\n\r\n    def apply(self, obj):\r\n        obj.rect.x += self.dx\r\n        obj.rect.y += self.dy\r\n\r\n    def update(self, target):\r\n        self.dx = width // 2 - target.rect.x - target.rect.w // 2\r\n        self.dy = height // 2 - target.rect.y - target.rect.h // 2\r\n\r\n\r\ndef load_level(filename):\r\n    return pytmx.load_pygame(filename)  # Загрузка уровня\r\n# TODO: доделать загрузку уровней\r\n\r\n\r\ndef generate_level(level):\r\n    new_player, x, y = None, None, None\r\n    for y in range(len(level)):\r\n        for x in range(len(level[y])):\r\n            if level[y][x] == '.':\r\n                Tile('empty', x, y)\r\n            elif level[y][x] == '#':\r\n                Tile('wall', x, y)\r\n            elif level[y][x] == '@':\r\n                Tile('empty', x, y)\r\n                new_player = Player(x, y)\r\n    # вернем игрока, а также размер поля в клетках\r\n    return new_player, x, y\r\n\r\n\r\ndef main():\r\n    # start_screen()\r\n    camera = Camera()\r\n    player, level_x, level_y = generate_level(load_level('level1.txt'))\r\n    running = True\r\n    screen.fill(pygame.Color('white'))\r\n    while running:\r\n        for event in pygame.event.get():\r\n            if event.type == pygame.QUIT:\r\n                running = False\r\n            elif event.type == pygame.KEYDOWN:\r\n                if event.key == pygame.K_LEFT:\r\n                    player.rect.x -= 32\r\n                if event.key == pygame.K_UP:\r\n                    player.rect.y -= 32\r\n                if event.key == pygame.K_RIGHT:\r\n                    player.rect.x += 32\r\n                if event.key == pygame.K_DOWN:\r\n                    player.rect.y += 32\r\n        screen.fill(pygame.Color('black'))\r\n        camera.update(player)\r\n        for sprite in all_sprites:\r\n            camera.apply(sprite)\r\n        tiles_group.draw(screen)\r\n        player_group.draw(screen)\r\n        # all_sprites.draw(screen)\r\n        pygame.display.flip()\r\n        clock.tick(50)\r\n    pygame.quit()\r\n\r\n\r\nif __name__ == '__main__':\r\n    main()
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/main.py b/main.py
+--- a/main.py	(revision 0d360da567f3d70039fffbc9fa1d25e9a76d4509)
++++ b/main.py	(date 1645987917878)
+@@ -1,134 +1,16 @@
+-import pygame
+-import sys
+-import os
+-import pytmx
+-
+-pygame.init()
+-size = width, height = 550, 550
+-screen = pygame.display.set_mode(size)
+-clock = pygame.time.Clock()
+-
+-
+-all_sprites = pygame.sprite.Group()
+-tiles_group = pygame.sprite.Group()
+-player_group = pygame.sprite.Group()
+-
+-
+-def terminate():
+-    pygame.quit()
+-    sys.exit()
+-
+-
+-def load_image(name, colorkey=None):
+-    fullname = os.path.join('data', name)
+-    # если файл не существует, то выходим
+-    if not os.path.isfile(fullname):
+-        print(f"Файл с изображением '{fullname}' не найден")
+-        sys.exit()
+-    image = pygame.image.load(fullname)
+-    if colorkey is not None:
+-        image = image.convert()
+-        if colorkey == -1:
+-            colorkey = image.get_at((0, 0))
+-        image.set_colorkey(colorkey)
+-    else:
+-        image = image.convert_alpha()
+-    return image
+-
+-
+-tile_images = {
+-    'wall': load_image('box.png'),  # Стена
+-    'empty': load_image('floor.png')  # Пол
+-}
+-player_image = load_image('mario.png')
+-
+-tile_width = tile_height = 50
+-
+-
+-
+-class Tile(pygame.sprite.Sprite):
+-    def __init__(self, tile_type, pos_x, pos_y):
+-        super().__init__(tiles_group, all_sprites)
+-        self.image = tile_images[tile_type]
+-        # if (self.image.get_rect().w, self.image.get_rect().h) < (tile_width, tile_height):
+-        #     self.image = pygame.transform.scale(self.image, (tile_width, tile_height))
+-        self.rect = self.image.get_rect().move(
+-            tile_width * pos_x, tile_height * pos_y)
+-
+-
+-class Player(pygame.sprite.Sprite):
+-    def __init__(self, pos_x, pos_y):
+-        super().__init__(player_group, all_sprites)
+-        self.image = player_image
+-        self.image = pygame.transform.scale(self.image, (32, 32))
+-        self.rect = self.image.get_rect().move(
+-            tile_width * pos_x + 15, tile_height * pos_y + 5)
++# This is a sample Python script.
+ 
++# Press Shift+F10 to execute it or replace it with your code.
++# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+ 
+-class Camera:
+-    def __init__(self):
+-        self.dx = 0
+-        self.dy = 0
+ 
+-    def apply(self, obj):
+-        obj.rect.x += self.dx
+-        obj.rect.y += self.dy
++def print_hi(name):
++    # Use a breakpoint in the code line below to debug your script.
++    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+ 
+-    def update(self, target):
+-        self.dx = width // 2 - target.rect.x - target.rect.w // 2
+-        self.dy = height // 2 - target.rect.y - target.rect.h // 2
+ 
+-
+-def load_level(filename):
+-    return pytmx.load_pygame(filename)  # Загрузка уровня
+-# TODO: доделать загрузку уровней
+-
+-
+-def generate_level(level):
+-    new_player, x, y = None, None, None
+-    for y in range(len(level)):
+-        for x in range(len(level[y])):
+-            if level[y][x] == '.':
+-                Tile('empty', x, y)
+-            elif level[y][x] == '#':
+-                Tile('wall', x, y)
+-            elif level[y][x] == '@':
+-                Tile('empty', x, y)
+-                new_player = Player(x, y)
+-    # вернем игрока, а также размер поля в клетках
+-    return new_player, x, y
+-
+-
+-def main():
+-    # start_screen()
+-    camera = Camera()
+-    player, level_x, level_y = generate_level(load_level('level1.txt'))
+-    running = True
+-    screen.fill(pygame.Color('white'))
+-    while running:
+-        for event in pygame.event.get():
+-            if event.type == pygame.QUIT:
+-                running = False
+-            elif event.type == pygame.KEYDOWN:
+-                if event.key == pygame.K_LEFT:
+-                    player.rect.x -= 32
+-                if event.key == pygame.K_UP:
+-                    player.rect.y -= 32
+-                if event.key == pygame.K_RIGHT:
+-                    player.rect.x += 32
+-                if event.key == pygame.K_DOWN:
+-                    player.rect.y += 32
+-        screen.fill(pygame.Color('black'))
+-        camera.update(player)
+-        for sprite in all_sprites:
+-            camera.apply(sprite)
+-        tiles_group.draw(screen)
+-        player_group.draw(screen)
+-        # all_sprites.draw(screen)
+-        pygame.display.flip()
+-        clock.tick(50)
+-    pygame.quit()
+-
+-
++# Press the green button in the gutter to run the script.
+ if __name__ == '__main__':
+-    main()
+\ No newline at end of file
++    print_hi('PyCharm')
++
++# See PyCharm help at https://www.jetbrains.com/help/pycharm/

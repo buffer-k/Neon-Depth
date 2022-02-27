@@ -1,0 +1,1204 @@
+Index: main.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/main.py b/main.py
+deleted file mode 100644
+--- a/main.py	(revision 0d360da567f3d70039fffbc9fa1d25e9a76d4509)
++++ /dev/null	(revision 0d360da567f3d70039fffbc9fa1d25e9a76d4509)
+@@ -1,134 +0,0 @@
+-import pygame
+-import sys
+-import os
+-import pytmx
+-
+-pygame.init()
+-size = width, height = 550, 550
+-screen = pygame.display.set_mode(size)
+-clock = pygame.time.Clock()
+-
+-
+-all_sprites = pygame.sprite.Group()
+-tiles_group = pygame.sprite.Group()
+-player_group = pygame.sprite.Group()
+-
+-
+-def terminate():
+-    pygame.quit()
+-    sys.exit()
+-
+-
+-def load_image(name, colorkey=None):
+-    fullname = os.path.join('data', name)
+-    # если файл не существует, то выходим
+-    if not os.path.isfile(fullname):
+-        print(f"Файл с изображением '{fullname}' не найден")
+-        sys.exit()
+-    image = pygame.image.load(fullname)
+-    if colorkey is not None:
+-        image = image.convert()
+-        if colorkey == -1:
+-            colorkey = image.get_at((0, 0))
+-        image.set_colorkey(colorkey)
+-    else:
+-        image = image.convert_alpha()
+-    return image
+-
+-
+-tile_images = {
+-    'wall': load_image('box.png'),  # Стена
+-    'empty': load_image('floor.png')  # Пол
+-}
+-player_image = load_image('mario.png')
+-
+-tile_width = tile_height = 50
+-
+-
+-
+-class Tile(pygame.sprite.Sprite):
+-    def __init__(self, tile_type, pos_x, pos_y):
+-        super().__init__(tiles_group, all_sprites)
+-        self.image = tile_images[tile_type]
+-        # if (self.image.get_rect().w, self.image.get_rect().h) < (tile_width, tile_height):
+-        #     self.image = pygame.transform.scale(self.image, (tile_width, tile_height))
+-        self.rect = self.image.get_rect().move(
+-            tile_width * pos_x, tile_height * pos_y)
+-
+-
+-class Player(pygame.sprite.Sprite):
+-    def __init__(self, pos_x, pos_y):
+-        super().__init__(player_group, all_sprites)
+-        self.image = player_image
+-        self.image = pygame.transform.scale(self.image, (32, 32))
+-        self.rect = self.image.get_rect().move(
+-            tile_width * pos_x + 15, tile_height * pos_y + 5)
+-
+-
+-class Camera:
+-    def __init__(self):
+-        self.dx = 0
+-        self.dy = 0
+-
+-    def apply(self, obj):
+-        obj.rect.x += self.dx
+-        obj.rect.y += self.dy
+-
+-    def update(self, target):
+-        self.dx = width // 2 - target.rect.x - target.rect.w // 2
+-        self.dy = height // 2 - target.rect.y - target.rect.h // 2
+-
+-
+-def load_level(filename):
+-    return pytmx.load_pygame(filename)  # Загрузка уровня
+-# TODO: доделать загрузку уровней
+-
+-
+-def generate_level(level):
+-    new_player, x, y = None, None, None
+-    for y in range(len(level)):
+-        for x in range(len(level[y])):
+-            if level[y][x] == '.':
+-                Tile('empty', x, y)
+-            elif level[y][x] == '#':
+-                Tile('wall', x, y)
+-            elif level[y][x] == '@':
+-                Tile('empty', x, y)
+-                new_player = Player(x, y)
+-    # вернем игрока, а также размер поля в клетках
+-    return new_player, x, y
+-
+-
+-def main():
+-    # start_screen()
+-    camera = Camera()
+-    player, level_x, level_y = generate_level(load_level('level1.txt'))
+-    running = True
+-    screen.fill(pygame.Color('white'))
+-    while running:
+-        for event in pygame.event.get():
+-            if event.type == pygame.QUIT:
+-                running = False
+-            elif event.type == pygame.KEYDOWN:
+-                if event.key == pygame.K_LEFT:
+-                    player.rect.x -= 32
+-                if event.key == pygame.K_UP:
+-                    player.rect.y -= 32
+-                if event.key == pygame.K_RIGHT:
+-                    player.rect.x += 32
+-                if event.key == pygame.K_DOWN:
+-                    player.rect.y += 32
+-        screen.fill(pygame.Color('black'))
+-        camera.update(player)
+-        for sprite in all_sprites:
+-            camera.apply(sprite)
+-        tiles_group.draw(screen)
+-        player_group.draw(screen)
+-        # all_sprites.draw(screen)
+-        pygame.display.flip()
+-        clock.tick(50)
+-    pygame.quit()
+-
+-
+-if __name__ == '__main__':
+-    main()
+\ No newline at end of file
+Index: 1.py
+===================================================================
+diff --git a/1.py b/1.py
+deleted file mode 100644
+--- a/1.py	(revision 0d360da567f3d70039fffbc9fa1d25e9a76d4509)
++++ /dev/null	(revision 0d360da567f3d70039fffbc9fa1d25e9a76d4509)
+@@ -1,172 +0,0 @@
+-import pygame
+-import sys
+-import os
+-
+-
+-pygame.init()
+-size = width, height = 1152, 648
+-screen = pygame.display.set_mode(size)
+-clock = pygame.time.Clock()
+-i = 0
+-
+-
+-all_sprites = pygame.sprite.Group()
+-boxes = pygame.sprite.Group()
+-
+-
+-def load_image(name, colorkey=None):
+-    fullname = os.path.join('data', name)
+-    # если файл не существует, то выходим
+-    if not os.path.isfile(fullname):
+-        print(f"Файл с изображением '{fullname}' не найден")
+-        sys.exit()
+-    image = pygame.image.load(fullname)
+-    if colorkey is not None:
+-        image = image.convert()
+-        if colorkey == -1:
+-            colorkey = image.get_at((0, 0))
+-        image.set_colorkey(colorkey)
+-    else:
+-        image = image.convert_alpha()
+-    return image
+-
+-
+-class Fon(pygame.sprite.Sprite):
+-    image = load_image('Background.png')
+-
+-    def __init__(self):
+-        super().__init__(all_sprites)
+-        self.image = Fon.image
+-        self.rect = self.image.get_rect()
+-
+-
+-class Box(pygame.sprite.Sprite):
+-    image = load_image('IndustrialTile_57.png')
+-
+-    def __init__(self, x, y):
+-        super().__init__(all_sprites)
+-        self.add(boxes)
+-        self.image = Box.image
+-        self.rect = self.image.get_rect()
+-        self.mask = pygame.mask.from_surface(self.image)
+-        self.rect.x = x
+-        self.rect.y = y
+-
+-
+-class Player(pygame.sprite.Sprite):
+-    def __init__(self, sheet, columns, rows, x, y):
+-        self.is_ground = False
+-        self.jumped = False
+-        self.x = 0
+-        self.y = 0
+-        super().__init__(all_sprites)
+-        self.frames = []
+-        self.cut_sheet(sheet, columns, rows)
+-        self.cur_frame = 0
+-        self.image = self.frames[self.cur_frame]
+-
+-    def cut_sheet(self, sheet, columns, rows):
+-        self.rect = pygame.Rect(self.x, self.y, sheet.get_width() // columns,
+-                                sheet.get_height() // rows)
+-        for j in range(rows):
+-            for i in range(columns):
+-                frame_location = (self.rect.w * i, self.rect.h * j)
+-                self.frames.append(sheet.subsurface(pygame.Rect(
+-                    frame_location, self.rect.size)))
+-
+-    def update(self):
+-        if self.jumped:
+-            self.rect.y -= self.coef
+-            self.y -= self.coef
+-            self.coef -= 1
+-        if not pygame.sprite.spritecollideany(self, boxes):
+-            self.rect.y += 5
+-            self.y += 5
+-        else:
+-            self.is_ground = True
+-            self.jumped = False
+-        global i
+-        if i == 10:
+-            self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+-            self.image = self.frames[self.cur_frame]
+-            i = 0
+-        else:
+-            i += 1
+-
+-    def jump(self):
+-        if self.is_ground and moving:
+-            self.coef = 18
+-            self.jumped = True
+-            self.is_ground = False
+-
+-
+-moving = False
+-
+-
+-def load_level(filename):
+-    filename = "data/" + filename
+-    # читаем уровень, убирая символы перевода строки
+-    with open(filename, 'r') as mapFile:
+-        level_map = [line.strip() for line in mapFile]
+-        max_width = max(map(len, level_map))
+-        # дополняем каждую строку пустыми клетками ('.')
+-        return list(map(lambda x: x.ljust(max_width, '.'), level_map))
+-
+-
+-def generate_level(level):
+-    new_player, x, y = None, None, None
+-    for y in range(len(level)):
+-        for x in range(len(level[y])):
+-            if level[y][x] == '*':
+-                Box(48 * x, 24 + 48 * y)
+-
+-
+-def main():
+-    global i
+-    global moving
+-    bg = pygame.image.load("data/Background.png")
+-    player = Player(load_image('stay.png'), 4, 1, 200, 200)
+-    generate_level(load_level('lvl1.txt'))
+-    running = True
+-    # fon = Fon()
+-    while running:
+-        for event in pygame.event.get():
+-            if event.type == pygame.QUIT:
+-                running = False
+-            elif event.type == pygame.KEYDOWN:
+-                if event.key == pygame.K_RIGHT:
+-                    moving = 4
+-                    player.frames = []
+-                    i = 10
+-                    player.cut_sheet(load_image("run.png"), 6, 1)
+-                elif event.key == pygame.K_LEFT:
+-                    moving = -4
+-                    player.frames = []
+-                    i = 10
+-                    player.cut_sheet(load_image("run1.png"), 6, 1)
+-                elif event.key == pygame.K_UP:
+-                    player.jump()
+-            elif event.type == pygame.KEYUP:
+-                if event.key == pygame.K_RIGHT:
+-                    moving = False
+-                    player.frames = []
+-                    player.cut_sheet(load_image("stay.png"), 4, 1)
+-                elif event.key == pygame.K_LEFT:
+-                    moving = False
+-                    player.frames = []
+-                    player.cut_sheet(load_image("stay1.png"), 4, 1)
+-            # elif event.type == pygame.MOUSEBUTTONDOWN:
+-
+-        if moving:
+-            player.x += moving
+-            player.rect.x += moving
+-        screen.blit(bg, (0, 0))
+-        all_sprites.draw(screen)
+-        all_sprites.update()
+-        pygame.display.flip()
+-        clock.tick(60)
+-    pygame.quit()
+-
+-
+-if __name__ == "__main__":
+-    main()
+\ No newline at end of file
+Index: MainMenu.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/MainMenu.py b/MainMenu.py
+new file mode 100644
+--- /dev/null	(date 1645975983145)
++++ b/MainMenu.py	(date 1645975983145)
+@@ -0,0 +1,48 @@
++import pygame
++import Main
++from Main import main as main_func
++import pygame_gui
++
++def main():
++
++    pygame.init()
++
++
++    screen = pygame.display.set_mode(Main.size)
++    manager = pygame_gui.UIManager(Main.size)
++    play = pygame_gui.elements.UIButton(
++        relative_rect=pygame.Rect((440, 200), (250, 50)),
++        text='Играть',
++        manager=manager
++    )
++
++    settings = pygame_gui.elements.UIButton(
++        relative_rect=pygame.Rect((440, 500), (250, 50)),
++        text='Управление',
++        manager=manager
++    )
++
++    clock = pygame.time.Clock()
++    running = True
++    bg = pygame.image.load('data/title.png')
++    while running:
++        for event in pygame.event.get():
++            if event.type == pygame.QUIT:
++                running = False
++            if event.type == pygame.USEREVENT:
++                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
++                    if event.ui_element == play:
++                        main_func()
++                    elif event.ui_element == settings:
++                        pass
++                        #TODO: okno nastroek
++            manager.process_events(event)
++            screen.fill(pygame.Color(31, 31, 31))
++            screen.blit(bg, (250, -100))
++            manager.update(clock.tick(60))
++            manager.draw_ui(screen)
++        pygame.display.update()
++
++
++if __name__ == '__main__':
++    main()
+Index: Main.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Main.py b/Main.py
+new file mode 100644
+--- /dev/null	(date 1645976117960)
++++ b/Main.py	(date 1645976117960)
+@@ -0,0 +1,488 @@
++import pygame
++import sys
++import os
++import time
++
++
++size = width, height = 1152, 648
++screen = pygame.display.set_mode(size)
++clock = pygame.time.Clock()
++i = 0
++MOVE_SPEED = 4
++JUMP_POWER = 10
++GRAVITY_FORCE = 0.55
++PLAYER_WIDTH = 48
++PLAYER_HEIGHT = 72
++FOR_I = 10
++ATTACK_SPEED = 10
++FIREBALL_MOVE_SPEED = 2
++ENEMY_SPEED = 2
++PROBEG = 0.55
++DAMAGE = 10
++DEAD = False
++
++
++all_sprites = pygame.sprite.Group()
++boxes = pygame.sprite.Group()
++enemy_group = pygame.sprite.Group()
++bullets = pygame.sprite.Group()
++attack = False
++player_group = pygame.sprite.Group()
++
++
++def load_image(name, colorkey=None):
++    fullname = os.path.join('data', name)
++    # если файл не существует, то выходим
++    if not os.path.isfile(fullname):
++        print(f"Файл с изображением '{fullname}' не найден")
++        sys.exit()
++    image = pygame.image.load(fullname)
++    if colorkey is not None:
++        image = image.convert()
++        if colorkey == -1:
++            colorkey = image.get_at((0, 0))
++        image.set_colorkey(colorkey)
++    else:
++        image = image.convert_alpha()
++    return image
++
++
++class Fon(pygame.sprite.Sprite):
++    image = load_image('Background.png')
++
++    def __init__(self):
++        super().__init__(all_sprites)
++        self.image = Fon.image
++        self.rect = self.image.get_rect()
++
++
++class FonBoxes(pygame.sprite.Sprite):
++    image = [load_image('IndustrialTile_03.png')]
++
++    def __init__(self, x, y, type):
++        super().__init__(all_sprites)
++        self.image = FonBoxes.image[type]
++        self.rect = self.image.get_rect()
++        self.rect.x = x
++        self.rect.y = y
++
++
++class Box(pygame.sprite.Sprite):
++    image = [load_image('IndustrialTile_57.png'), load_image('chest.png')]
++
++    def __init__(self, x, y, type):
++        super().__init__(all_sprites)
++        self.add(boxes)
++        self.image = Box.image[type]
++        self.rect = self.image.get_rect()
++        self.mask = pygame.mask.from_surface(self.image)
++        self.rect.x = x
++        self.rect.y = y
++
++
++class FireBall(pygame.sprite.Sprite):
++    image = load_image('fireball.png')
++
++    def __init__(self, x, y, type):
++        # type - 1, если вправо; 2, если влевоd
++        super().__init__(all_sprites)
++        self.rect = self.image.get_rect()
++        self.add(bullets)
++        self.rect.x = x + PLAYER_WIDTH
++        self.rect.y = y + PLAYER_HEIGHT / 2
++        self.type = type
++
++    def update(self):
++        self.rect.x += self.type * FIREBALL_MOVE_SPEED
++        if self.rect.x > 1200 or self.rect.x < -30:
++                self.kill()
++        print(self.rect.x)
++
++# class Bullet(pygame.sprite.Sprite):
++#     def __init__(self, player):
++#         super().__init__(all_sprites)
++#         self.add(bullets)
++#         self.image = load_image('bullet.png')
++#         self.rect = self.image.get_rect()
++#         self.xvel = 0
++#         if player.xvel > 0:
++#             self.rect.x = player.rect.x + 10
++#             self.xvel = 3
++#         if player.xvel < 0:
++#             self.rect.x = player.rect.x - 10
++#             self.xvel = -3
++#             self.image = pygame.transform.flip(self.image, True, False)
++#         self.rect.y = player.rect.y + 40
++#         self.player = player
++#
++#     def update(self, enemies):
++#         # print(self.rect.x, self.player.xvel)
++#         self.rect.x += self.xvel
++#         if self.rect.x > 1200 or self.rect.x < -30:
++#             self.kill()
++#
++#         if pygame.sprite.spritecollideany(self, enemy_group):
++#             # print(self.rect.x)
++#             self.kill()
++#             # for enemy in enemies:
++#             #     print(enemy.rect.x)
++#             #     if pygame.sprite.spritecollideany(enemy, bullets):
++#             #         print(enemy.rect.x)
++#             #         enemy.kill()
++
++
++class Enemy(pygame.sprite.Sprite):
++    def __init__(self, x, y):
++        super().__init__(all_sprites)
++        self.add(enemy_group)
++        self.rect = pygame.Rect(x, y, 0, 0)
++        self.frames = []
++        self.cut_sheet(load_image('enemy_run.png'), 6, 1)
++        self.cur_frame = 0
++        self.image = self.frames[self.cur_frame]
++        self.rect = self.image.get_rect()
++        self.rect.x = x
++        self.rect.y = y
++        self.i = 0
++        self.right = True
++        self.left = False
++        self.isGround = False
++        self.xvel = 0
++        self.yvel = 0
++        self.hp = 20
++
++    def cut_sheet(self, sheet, columns, rows):
++        self.cur_frame = 0
++        self.rect = pygame.Rect(self.rect.x, self.rect.y, sheet.get_width() // columns,
++                                sheet.get_height() // rows)
++        for j in range(rows):
++            for i in range(columns):
++                frame_location = (self.rect.w * i, self.rect.h * j)
++                self.frames.append(sheet.subsurface(pygame.Rect(
++                    frame_location, self.rect.size)))
++
++    def update(self):
++        self.rect.w = 50
++        # if self.rect.y > 700:
++        #     self.die()
++        #
++
++        if self.right:
++            self.xvel = ENEMY_SPEED
++        if self.left:
++            self.xvel = -ENEMY_SPEED
++
++        if not self.isGround:
++            self.yvel += GRAVITY_FORCE
++
++        self.rect.x += self.xvel
++
++        self.collide(self.xvel, 0, boxes)
++
++        self.isGround = False
++        self.rect.y += self.yvel
++
++        self.collide(0, self.yvel, boxes)
++
++        if self.hp <= 0:
++            self.kill()
++
++        if self.i == 10:
++            self.cur_frame = (self.cur_frame + 1) % len(self.frames)
++            self.image = self.frames[self.cur_frame]
++            self.i = 0
++        else:
++            self.i += 1
++
++    def collide(self, xvel, yvel, boxes):
++        for box in boxes:
++            if pygame.sprite.collide_rect(self, box):  # если есть пересечение платформы с игроком
++
++                if xvel > 0:  # если движется вправо
++                    self.rect.right = box.rect.left  # то не движется вправо
++                    self.frames = []
++                    self.cut_sheet(load_image('enemy_run1.png'), 6, 1)
++                    self.right = False
++                    self.left = True
++
++                if xvel < 0:  # если движется влево
++                    self.rect.left = box.rect.right  # то не движется влево
++                    self.frames = []
++                    self.cut_sheet(load_image('enemy_run.png'), 6, 1)
++                    self.rect.x -= 1
++                    self.right = True
++                    self.left = False
++
++                if yvel > 0:  # если падает вниз
++                    self.rect.bottom = box.rect.top  # то не падает вниз
++                    self.isGround = True  # и становится на что-то твердое
++                    self.yvel = 0  # и энергия падения пропадает
++
++                if yvel < 0:  # если движется вверх
++                    self.rect.top = box.rect.bottom  # то не движется вверх
++                    self.yvel = 0
++        for bullet in bullets:
++            if pygame.sprite.collide_rect(self, bullet):
++                bullet.kill()
++                self.hit()
++
++    def hit(self):
++        if self.xvel > 0:
++            self.image = pygame.image.load('data/enemy_hit.png')
++        else:
++            self.image = pygame.image.load('data/enemy_hit1.png')
++        self.hp -= DAMAGE
++
++
++class Player(pygame.sprite.Sprite):
++    def __init__(self, sheet, columns, rows, x, y):
++        self.xvel = 0
++        self.yvel = 0
++        self.isGround = False
++        self.isAttack = False
++        super().__init__(player_group)
++        self.rect = pygame.Rect(x, y, 0, 0)
++        self.frames = []
++        self.cut_sheet(sheet, columns, rows)
++        self.cur_frame = 0
++        self.image = self.frames[self.cur_frame]
++        self.start_x = x
++        self.start_y = y
++        self.poryadok = 1
++        self.xvel_for_hit = 0
++        self.hp = 20
++
++    def cut_sheet(self, sheet, columns, rows):
++        self.isAttack = False
++        self.cur_frame = 0
++        self.poryadok = 1
++        self.rect = pygame.Rect(self.rect.x, self.rect.y, sheet.get_width() // columns,
++                                sheet.get_height() // rows)
++        for j in range(rows):
++            for i in range(columns):
++                frame_location = (self.rect.w * i, self.rect.h * j)
++                self.frames.append(sheet.subsurface(pygame.Rect(
++                    frame_location, self.rect.size)))
++
++    def update(self, left, right, up):
++        global attack, i
++        self.rect.w = PLAYER_WIDTH
++        if self.rect.y > 700:
++            self.die()
++
++        if right:
++            self.xvel = MOVE_SPEED
++        if left:
++            self.xvel = -MOVE_SPEED
++        if not (left or right):
++            self.xvel = 0
++
++        if up:
++            if self.isGround:
++                self.yvel = -JUMP_POWER
++        if not self.isGround:
++            self.yvel += GRAVITY_FORCE
++
++        if self.xvel_for_hit > 0:
++            self.rect.x -= self.xvel_for_hit
++            self.xvel_for_hit -= PROBEG
++
++        self.rect.x += self.xvel
++        # self.x += self.xvel
++        self.collide(self.xvel, 0, boxes)
++
++        self.isGround = False
++        self.rect.y += self.yvel
++        # self.y += self.yvel
++        self.collide(0, self.yvel, boxes)
++
++        if self.hp <= 0:
++            self.die()
++
++        if self.isAttack:
++            if self.cur_frame == 6 and i == 0:
++                bul = FireBall(self.rect.x, self.rect.y, 1)
++
++        if self.rect.x > width:
++            from MainMenu import main as main_menu
++
++
++        if i == FOR_I:
++            self.cur_frame = (self.cur_frame + 1) % len(self.frames)
++            self.image = self.frames[self.cur_frame]
++            i = 0
++        else:
++            i += 1
++
++        print(self.cur_frame)
++    def attack(self):
++        self.isAttack = True
++
++    def draw(self, screen):
++        screen.blit(self.image, (self.rect.x, self.rect.y))
++
++    def die(self):
++        global GRAVITY_FORCE, FOR_I, i, DEAD
++        # time.sleep(2)
++        # self.teleport(self.start_x, self.start_y)
++        for something in all_sprites:
++            something.kill()
++        GRAVITY_FORCE = 0
++        self.yvel = 0
++        self.xvel = 0
++        self.frames = []
++        i = 0
++        self.hp = 10
++        FOR_I = 60
++        self.cut_sheet(load_image('death.png'), 6, 1)
++        self.cur_frame = 0
++        self.image = self.frames[0]
++        DEAD = True
++
++
++    def hit(self):
++        self.yvel = -13
++        self.image = pygame.image.load('data/Punk_hurt.png')
++        self.hp -= 10
++
++    def teleport(self, x, y):
++        self.rect.x = x
++        self.rect.y = y
++
++    def collide(self, xvel, yvel, boxes):
++        for box in boxes:
++            if pygame.sprite.collide_rect(self, box):  # если есть пересечение платформы с игроком
++
++                if xvel > 0:  # если движется вправо
++                    self.rect.right = box.rect.left  # то не движется вправо
++
++                if xvel < 0:  # если движется влево
++                    self.rect.left = box.rect.right  # то не движется влево
++
++                if yvel > 0:  # если падает вниз
++                    self.rect.bottom = box.rect.top  # то не падает вниз
++                    self.isGround = True  # и становится на что-то твердое
++                    self.yvel = 0  # и энергия падения пропадает
++
++                if yvel < 0:  # если движется вверх
++                    self.rect.top = box.rect.bottom  # то не движется вверх
++                    self.yvel = 0
++
++        if pygame.sprite.spritecollideany(self, enemy_group):
++            if not (self.yvel < -10):
++                self.hit()
++            print(self.rect.x, self.xvel)
++
++
++def load_level(filename):
++    filename = "data/" + filename
++    # читаем уровень, убирая символы перевода строки
++    with open(filename, 'r') as mapFile:
++        level_map = [line.strip() for line in mapFile]
++        max_width = max(map(len, level_map))
++        # дополняем каждую строку пустыми клетками ('.')
++        return list(map(lambda x: x.ljust(max_width, '.'), level_map))
++
++
++def generate_level(level):
++    for y in range(len(level)):
++        for x in range(len(level[y])):
++            if level[y][x] == '*':
++                Box(48 * x, 24 + 48 * y, 0)
++            elif level[y][x] == 'f':
++                FonBoxes(48 * x, 24 + 48 * y, 0)
++            elif level[y][x] == 'c':
++                Box(48 * x, 24 + 48 * y, 1)
++            elif level[y][x] == 'e':
++                Enemy(48 * x, 24 + 48 * y)
++
++
++def main():
++    pygame.init()
++    global i
++    global FOR_I
++    global attack
++    bg = pygame.image.load("data/Background.jpg")
++    player = Player(load_image('stay.png'), 4, 1, 200, 400)
++    generate_level(load_level('lvl1.txt'))
++    running = True
++    OPACITY = 255
++    left = right = up = attack = False
++    # fon = Fon()
++    while running:
++        for event in pygame.event.get():
++            if event.type == pygame.QUIT:
++                running = False
++            if not DEAD:
++                if event.type == pygame.KEYDOWN:
++                    if event.key == pygame.K_b:
++                        player.throw()
++                    if event.key == pygame.K_d:
++                        if not left and not attack:
++                            right = True
++                            player.frames = []
++                            i = 10
++                            player.cut_sheet(load_image("run.png"), 6, 1)
++                    elif event.key == pygame.K_a:
++                        if not right and not attack:
++                            left = True
++                            player.frames = []
++                            i = 10
++                            player.cut_sheet(load_image("run1.png"), 6, 1)
++                    elif event.key == pygame.K_w:
++                        up = True
++                    elif event.key == pygame.K_RIGHT:
++                        if not (left or right):
++                            player.frames = []
++                            i = 0
++                            player.cut_sheet(load_image("attack.png"), 8, 1)
++                            FOR_I = ATTACK_SPEED
++                            player.attack()
++                            attack = True
++
++                elif event.type == pygame.KEYUP:
++                    if event.key == pygame.K_d:
++                        right = False
++                        if not left and not attack:
++                            player.frames = []
++                            i = 10
++                            player.cut_sheet(load_image("stay.png"), 4, 1)
++                    elif event.key == pygame.K_a:
++                        left = False
++                        if not right and not attack:
++                            player.frames = []
++                            i = 10
++                            player.cut_sheet(load_image("stay1.png"), 4, 1)
++                    elif event.key == pygame.K_w:
++                        up = False
++                    elif event.key == pygame.K_RIGHT:
++                        if not (left or right):
++                            player.frames = []
++                            i = 10
++                            player.cut_sheet(load_image("stay.png"), 4, 1)
++                            FOR_I = 10
++                            attack = False
++            else:
++                left = False
++                right = False
++        screen.blit(bg, (0, 0))
++        # screen.fill((0, 0, 0))
++        all_sprites.draw(screen)
++        all_sprites.update()
++        player_group.update(left, right, up)
++        player_group.draw(screen)
++        clock.tick(60)
++        pygame.display.flip()
++        if DEAD:
++            pygame.draw.rect(bg, (OPACITY, OPACITY, OPACITY, OPACITY), (0, 0, *size))
++            if i >= 7:
++                OPACITY -= 1
++            if OPACITY < 0:
++                pygame.quit()
++                from MainMenu import main as main_menu
++                main_menu()
++    pygame.quit()
++
++
++if __name__ == "__main__":
++    main()
+Index: data/lvl2.txt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/data/lvl2.txt b/data/lvl2.txt
+new file mode 100644
+--- /dev/null	(date 1645874105125)
++++ b/data/lvl2.txt	(date 1645874105125)
+@@ -0,0 +1,13 @@
++...........................
++..........e................
++...........................
++...........................
++...........................
++...........................
++.......******........*.....
++.....................******
++...................*.......
++...c......*********........
++..***********ffff..........
++*****************..........
++***************************
+Index: data/lvl1.txt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>...........................\r\n...........................\r\n...........................\r\n...........................\r\n...........................\r\n...........................\r\n...........................\r\n...........................\r\n...........................\r\n...........................\r\n...........................\r\n*****************..........\r\n***************************\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/data/lvl1.txt b/data/lvl1.txt
+--- a/data/lvl1.txt	(revision 0d360da567f3d70039fffbc9fa1d25e9a76d4509)
++++ b/data/lvl1.txt	(date 1645867868826)
+@@ -1,13 +1,13 @@
+ ...........................
+-...........................
+-...........................
+-...........................
++..........e................
+ ...........................
+ ...........................
+ ...........................
+-...........................
+-...........................
+-...........................
+-...........................
++.......*....*...***........
++.......******........*.....
++.....................******
++...................*.......
++...c......*********........
++..***********ffff..........
+ *****************..........
+ ***************************
+Index: 2.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/2.py b/2.py
+new file mode 100644
+--- /dev/null	(date 1643294743442)
++++ b/2.py	(date 1643294743442)
+@@ -0,0 +1,258 @@
++import pygame
++import sys
++import os
++
++
++pygame.init()
++size = width, height = 1152, 648
++screen = pygame.display.set_mode(size)
++clock = pygame.time.Clock()
++i = 0
++can_run_left = True
++can_run_right = True
++MOVE_SPEED = 7
++
++
++all_sprites = pygame.sprite.Group()
++boxes = pygame.sprite.Group()
++all_dots = pygame.sprite.Group()
++for_pl = pygame.sprite.Group()
++
++
++def load_image(name, colorkey=None):
++    fullname = os.path.join('data', name)
++    # если файл не существует, то выходим
++    if not os.path.isfile(fullname):
++        print(f"Файл с изображением '{fullname}' не найден")
++        sys.exit()
++    image = pygame.image.load(fullname)
++    if colorkey is not None:
++        image = image.convert()
++        if colorkey == -1:
++            colorkey = image.get_at((0, 0))
++        image.set_colorkey(colorkey)
++    else:
++        image = image.convert_alpha()
++    return image
++
++
++class Check_side_collision(pygame.sprite.Sprite):
++    def __init__(self):
++        super().__init__(all_dots)
++        self.rect = pygame.Rect(0, 0, 38, 50)
++
++    def update(self):
++        global moving, can_run_left, can_run_right
++        self.rect.x = player.x + 11
++        self.rect.y = player.y + 1
++        if pygame.sprite.spritecollideany(self, boxes):
++            if moving == -5:
++                can_run_left = False
++            if moving == 5:
++                can_run_right = False
++        else:
++            can_run_right = True
++            can_run_left = True
++
++
++class Check_bottom_collision(pygame.sprite.Sprite):
++    def __init__(self):
++        super().__init__(all_dots)
++        self.rect = pygame.Rect(0, 0, 35, 1)
++
++    def update(self):
++        global moving, can_run_left, can_run_right
++        self.rect.x = player.x + 20
++        self.rect.y = player.y + 67
++        if player.jumped:
++            player.rect.y -= player.coef
++            player.y -= player.coef
++            player.coef -= 1
++            if player.coef == -1:
++                player.coef = 0
++            self.rect.x = player.x + 2
++            self.rect.y = player.y + 67
++        if not pygame.sprite.spritecollideany(self, boxes):
++            player.y += 8
++            player.rect.y += 8
++        elif can_run_left and can_run_right:
++            player.is_ground = True
++            player.jumped = False
++
++
++class Check_top_collision(pygame.sprite.Sprite):
++    def __init__(self):
++        super().__init__(all_dots)
++        self.rect = pygame.Rect(0, 0, 35, 2)
++
++    def update(self):
++        global moving, can_run_left, can_run_right
++        self.rect.x = player.x + 12
++        self.rect.y = player.y
++        if pygame.sprite.spritecollideany(self, boxes):
++            player.jumped = False
++            print(16)
++
++
++
++
++class Fon(pygame.sprite.Sprite):
++    image = [load_image('fon.jpg')]
++
++    def __init__(self, x, y, type):
++        super().__init__(all_sprites)
++        self.image = Fon.image[type]
++        self.rect = self.image.get_rect()
++        self.rect.x = x
++        self.rect.y = y
++
++
++class Box(pygame.sprite.Sprite):
++    image = [load_image('IndustrialTile_57.png'), load_image('Locker4.jpg')]
++
++    def __init__(self, x, y, type):
++        super().__init__(all_sprites)
++        self.add(boxes)
++        self.image = Box.image[type]
++        self.rect = self.image.get_rect()
++        self.rect.x = x
++        self.rect.y = y
++
++
++class Player(pygame.sprite.Sprite):
++    def __init__(self, sheet, columns, rows, x, y):
++        self.is_ground = False
++        self.jumped = False
++        self.x = 0
++        self.xvel = 0
++        self.yvel = 0
++        self.y = 0
++        super().__init__(all_sprites)
++        self.frames = []
++        self.add(for_pl)
++        self.cut_sheet(sheet, columns, rows)
++        self.cur_frame = 0
++        self.image = self.frames[self.cur_frame]
++
++    def cut_sheet(self, sheet, columns, rows):
++        self.rect = pygame.Rect(self.x, self.y, sheet.get_width() // columns,
++                                sheet.get_height() // rows)
++        for j in range(rows):
++            for i in range(columns):
++                frame_location = (self.rect.w * i, self.rect.h * j)
++                self.frames.append(sheet.subsurface(pygame.Rect(
++                    frame_location, self.rect.size)))
++
++    def update(self, left, right):
++        self.rect.w = 38
++        if pygame.sprite.spritecollideany(self, boxes):
++            pass
++        global i
++        if i == 10:
++            self.cur_frame = (self.cur_frame + 1) % len(self.frames)
++            self.image = self.frames[self.cur_frame]
++            i = 0
++        else:
++            i += 1
++        if left:
++            self.xvel = -MOVE_SPEED  # Лево = x- n
++
++        if right:
++            self.xvel = MOVE_SPEED  # Право = x + n
++
++        if not (left or right):  # стоим, когда нет указаний идти
++            self.xvel = 0
++
++        self.rect.x += self.xvel  # переносим свои положение на xvel
++
++    def jump(self):
++        if self.is_ground and moving:
++            self.coef = 19
++            self.jumped = True
++            self.is_ground = False
++
++
++moving = False
++
++
++def load_level(filename):
++    filename = "data/" + filename
++    # читаем уровень, убирая символы перевода строки
++    with open(filename, 'r') as mapFile:
++        level_map = [line.strip() for line in mapFile]
++        max_width = max(map(len, level_map))
++        # дополняем каждую строку пустыми клетками ('.')
++        return list(map(lambda x: x.ljust(max_width, '.'), level_map))
++
++
++def generate_level(level):
++    new_player, x, y = None, None, None
++    for y in range(len(level)):
++        for x in range(len(level[y])):
++            if level[y][x] == '*':
++                Box(48 * x, 24 + 48 * y, 0)
++            if level[y][x] == '#':
++                Fon(48 * x, 24 + 48 * y, 0)
++            if level[y][x] == 'L':
++                Box(48 * x,  48 * y, 1)
++
++
++def main():
++    global i
++    global moving
++    bg = pygame.image.load("data/Background.png")
++    global player
++    player = Player(load_image('stay.png'), 4, 1, 200, 200)
++    generate_level(load_level('lvl1.txt'))
++    running = True
++    # fon = Fon()
++    left = right = False
++    while running:
++        for event in pygame.event.get():
++            if event.type == pygame.QUIT:
++                running = False
++            elif event.type == pygame.KEYDOWN:
++                if event.key == pygame.K_RIGHT:
++                    right = True
++                    player.frames = []
++                    i = 10
++                    player.cut_sheet(load_image("run.png"), 6, 1)
++                elif event.key == pygame.K_LEFT:
++                    left = True
++                    player.frames = []
++                    i = 10
++                    player.cut_sheet(load_image("run1.png"), 6, 1)
++                elif event.key == pygame.K_UP:
++                    player.jump()
++            elif event.type == pygame.KEYUP:
++                if event.key == pygame.K_RIGHT:
++                    moving = False
++                    player.frames = []
++                    player.cut_sheet(load_image("stay.png"), 4, 1)
++                elif event.key == pygame.K_LEFT:
++                    moving = False
++                    player.frames = []
++                    player.cut_sheet(load_image("stay1.png"), 4, 1)
++            # elif event.type == pygame.MOUSEBUTTONDOWN:
++
++        if moving:
++            if moving == -5 and can_run_left:
++                player.x += moving
++                player.rect.x += moving
++            if moving == 5 and can_run_right:
++                player.x += moving
++                player.rect.x += moving
++        screen.blit(bg, (0, 0))
++        all_sprites.draw(screen)
++        all_sprites.update(left, right)
++        all_dots.update()
++        for_pl.draw(screen)
++        boxes.draw(screen)
++        player.update(left, right)
++        pygame.display.flip()
++        clock.tick(60)
++    pygame.quit()
++
++
++if __name__ == "__main__":
++    main()
+\ No newline at end of file
