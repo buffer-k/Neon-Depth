@@ -305,7 +305,7 @@ class Player(pygame.sprite.Sprite):
 
         if self.rect.x > width:
             from MainMenu import main as main_menu
-                menu()
+                main_menu()
 
         if i == FOR_I:
             self.cur_frame = (self.cur_frame + 1) % len(self.frames)
